@@ -7,7 +7,7 @@ using Chat.Client.Core;
 using Chat.Protocol;
 
 namespace Chat.Client.Wpf;
-
+/*
 public partial class MainWindow : Window
 {
     private ChatClient? _chatClient;
@@ -257,5 +257,42 @@ public partial class MainWindow : Window
     private void UsernameBox_TextChanged(object sender, TextChangedEventArgs e)
     {
 
+    }
+}*/
+
+public partial class MainWindow : Window
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    private void LoginButton_Click(object sender, RoutedEventArgs e)
+    {
+        string username = UsernameTextBox.Text.Trim();
+        string password = PasswordInput.Password;
+
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrWhiteSpace(password))
+        {
+            StatusTextBlock.Text =
+                "Vui lòng nhập tên tài khoản và mật khẩu.";
+            return;
+        }
+
+        StatusTextBlock.Foreground =
+            System.Windows.Media.Brushes.DarkOrange;
+
+        StatusTextBlock.Text =
+            "Giao diện đã nhận thông tin. Chưa kết nối server.";
+    }
+
+    private void RegisterButton_Click(object sender, RoutedEventArgs e)
+    {
+        StatusTextBlock.Foreground =
+            System.Windows.Media.Brushes.DarkOrange;
+
+        StatusTextBlock.Text =
+            "Chức năng đăng ký sẽ được kết nối ở bước tiếp theo.";
     }
 }
