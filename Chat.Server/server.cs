@@ -9,6 +9,8 @@ using Chat.Protocol;
 using Chat.Server;
 using Chat.Server.Auth;
 using Npgsql;
+using System.Collections.Generic;
+using System.Linq;
 
 const int port = 5000;
 
@@ -236,13 +238,114 @@ static async Task HandleClientAsync(
             }
 
             // Bỏ hoàn toàn cơ chế cũ cho phép client tự khai username.
-            if (message.Type == "chat.join")
+            /* if (message.Type == "chat.join")
+             {
+                 SendError(
+                     session, message.RequestId,
+                     "chat.join is no longer supported. Please log in.");
+                 continue;
+             }*/
+
+
+            else if (message.Type == "history.get")
             {
-                SendError(
-                    session, message.RequestId,
-                    "chat.join is no longer supported. Please log in.");
-                continue;
+                if (!session.IsAuthenticated)
+                {
+                    SendError(
+                        session,
+                        message.RequestId,
+                        "Authentication required.");
+                    continue;
+                }
+
+                int limit = 50;
+
+                if (message.Payload.TryGetProperty(
+                        "limit", out JsonElement limitElement))
+                {
+                    if (limitElement.ValueKind != JsonValueKind.Number ||
+                        !limitElement.TryGetInt32(out limit) ||
+                        limit < 1)
+                    {
+                        SendError(
+                            session,
+                            message.RequestId,
+                            "Limit must be a positive integer.");
+                        continue;
+                    }
+                }
+
+                // Không cho client yêu cầu quá nhiều bản ghi.
+                limit = Math.Min(limit, 50);
+
+                long? beforeId = null;
+
+                if (message.Payload.TryGetProperty(
+                        "beforeId", out JsonElement beforeElement))
+                {
+                    if (beforeElement.ValueKind != JsonValueKind.Number ||
+                        !beforeElement.TryGetInt64(out long parsedBeforeId) ||
+                        parsedBeforeId <= 0)
+                    {
+                        SendError(
+                            session,
+                            message.RequestId,
+                            "beforeId must be a positive integer.");
+                        continue;
+                    }
+
+                    beforeId = parsedBeforeId;
+                }
+
+                try
+                {
+                    List<SavedMessage> history =
+                        await messageRepository.GetHistoryAsync(
+                            beforeId,
+                            limit,
+                            connectionCts.Token);
+
+                    bool hasMore = history.Count > limit;
+
+                    // Nếu có bản ghi dư, bỏ bản cũ nhất trong kết quả
+                    // để trang chỉ chứa đúng số lượng client yêu cầu.
+                    if (hasMore)
+                        history.RemoveAt(0);
+
+                    var payload = new
+                    {
+                        messages = history.Select(item => new
+                        {
+                            messageId = item.Id,
+                            sender = item.Sender,
+                            text = item.Text,
+                            sentAtUtc = item.CreatedAt
+                        }).ToArray(),
+                        hasMore
+                    };
+
+                    if (!session.TrySend(CreateMessage(
+                            "history.result",
+                            message.RequestId,
+                            payload)))
+                    {
+                        Console.WriteLine(
+                            "[WARN] Could not queue history response.");
+                    }
+                }
+
+                catch (NpgsqlException ex)
+                {
+                    Console.WriteLine(
+                        $"[DB ERROR] Loading chat history failed: {ex.GetType().Name}");
+
+                    SendError(
+                        session,
+                        message.RequestId,
+                        "Could not load chat history. Please try again.");
+                }
             }
+
 
             if (!session.IsAuthenticated)
             {
