@@ -1,4 +1,4 @@
-﻿
+﻿/*
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,258 +7,6 @@ using Chat.Client.Core;
 using Chat.Protocol;
 
 namespace Chat.Client.Wpf;
-/*
-public partial class MainWindow : Window
-{
-    private ChatClient? _chatClient;
-
-    private readonly ObservableCollection<string> _onlineUsers = new();
-    private readonly ObservableCollection<string> _messages = new();
-
-    public MainWindow()
-    {
-        InitializeComponent();
-
-        OnlineList.ItemsSource = _onlineUsers;
-        MessagesList.ItemsSource = _messages;
-    }
-
-    private async void ConnectButton_Click(
-        object sender, RoutedEventArgs e)
-    {
-        if (_chatClient is not null)
-        {
-            ConnectButton.IsEnabled = false;
-
-            try
-            {
-                await _chatClient.DisposeAsync();
-            }
-            catch (Exception ex)
-            {
-                AddMessage($"[Disconnect error] {ex.Message}");
-            }
-
-            _chatClient = null;
-            ConnectButton.Content = "Connect";
-            StatusText.Text = "Disconnected";
-            _onlineUsers.Clear();
-            ConnectButton.IsEnabled = true;
-            return;
-        }
-
-        string host = HostBox.Text.Trim();
-        string username = UsernameBox.Text.Trim();
-
-        if (string.IsNullOrWhiteSpace(host))
-        {
-            StatusText.Text = "Enter a server host.";
-            return;
-        }
-
-        if (username.Length is < 1 or > 24)
-        {
-            StatusText.Text = "Username must be 1–24 characters.";
-            return;
-        }
-
-        ConnectButton.IsEnabled = false;
-
-        var client = new ChatClient();
-
-        client.StatusChanged += status =>
-        {
-            Dispatcher.Invoke(() =>
-            {
-                StatusText.Text = status;
-            });
-        };
-
-        client.MessageReceived += message =>
-        {
-            Dispatcher.Invoke(() => HandleMessage(message));
-        };
-
-        try
-        {
-            await client.ConnectAsync(host, 5000, username);
-
-            _chatClient = client;
-            ConnectButton.Content = "Disconnect";
-            AddMessage($"Connected as {username}.");
-        }
-        catch (Exception ex)
-        {
-            AddMessage($"[Connection error] {ex.Message}");
-
-            await client.DisposeAsync();
-
-            StatusText.Text = "Connection failed";
-        }
-        finally
-        {
-            ConnectButton.IsEnabled = true;
-        }
-    }
-
-    private void HandleMessage(ChatMessage message)
-    {
-        switch (message.Type)
-        {
-            case "chat.joined":
-                AddMessage("You joined the chat.");
-                break;
-
-            case "presence.list":
-                _onlineUsers.Clear();
-
-                foreach (var item in message.Payload
-                    .GetProperty("users").EnumerateArray())
-                {
-                    string username = item.GetString() ?? "";
-
-                    if (username.Length > 0 &&
-                        !_onlineUsers.Contains(username))
-                    {
-                        _onlineUsers.Add(username);
-                    }
-                }
-                break;
-
-            case "presence.changed":
-                {
-                    string username = message.Payload
-                        .GetProperty("username").GetString() ?? "";
-
-                    bool online = message.Payload
-                        .GetProperty("online").GetBoolean();
-
-                    if (online)
-                    {
-                        if (!_onlineUsers.Contains(username))
-                            _onlineUsers.Add(username);
-
-                        AddMessage($"{username} came online.");
-                    }
-                    else
-                    {
-                        _onlineUsers.Remove(username);
-                        AddMessage($"{username} went offline.");
-                    }
-
-                    break;
-                }
-
-            case "chat.receive":
-                {
-                    string sender = message.Payload
-                        .GetProperty("sender").GetString() ?? "Unknown";
-
-                    string text = message.Payload
-                        .GetProperty("text").GetString() ?? "";
-
-                    AddMessage($"[{sender}] {text}");
-                    break;
-                }
-
-            case "chat.system":
-                AddMessage(message.Payload
-                    .GetProperty("text").GetString() ?? "");
-                break;
-
-            case "error":
-                AddMessage("[Server error] " +
-                    (message.Payload.GetProperty("message")
-                        .GetString() ?? "Unknown error"));
-                break;
-
-            default:
-                AddMessage($"[Unhandled message] {message.Type}");
-                break;
-        }
-    }
-
-    private async void SendButton_Click(
-        object sender, RoutedEventArgs e)
-    {
-        await SendCurrentMessageAsync();
-    }
-
-    private async void MessageInput_KeyDown(
-        object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
-            e.Handled = true;
-            await SendCurrentMessageAsync();
-        }
-    }
-
-    private async Task SendCurrentMessageAsync()
-    {
-        string text = MessageInput.Text.Trim();
-
-        if (text.Length == 0)
-            return;
-
-        if (_chatClient is null)
-        {
-            StatusText.Text = "Connect to the server first.";
-            return;
-        }
-
-        SendButton.IsEnabled = false;
-
-        try
-        {
-            await _chatClient.SendChatAsync(text);
-            MessageInput.Clear();
-        }
-        catch (Exception ex)
-        {
-            AddMessage($"[Send error] {ex.Message}");
-        }
-        finally
-        {
-            SendButton.IsEnabled = true;
-            MessageInput.Focus();
-        }
-    }
-
-    private void AddMessage(string text)
-    {
-        _messages.Add($"[{DateTime.Now:HH:mm:ss}] {text}");
-
-        // Giữ số dòng trong giao diện ở mức hợp lý.
-        while (_messages.Count > 500)
-            _messages.RemoveAt(0);
-
-        if (MessagesList.Items.Count > 0)
-            MessagesList.ScrollIntoView(
-                MessagesList.Items[MessagesList.Items.Count - 1]);
-    }
-
-    protected override async void OnClosed(EventArgs e)
-    {
-        if (_chatClient is not null)
-        {
-            await _chatClient.DisposeAsync();
-            _chatClient = null;
-        }
-
-        base.OnClosed(e);
-    }
-
-    private void MessageInput_TextChanged(object sender, TextChangedEventArgs e)
-    {
-
-    }
-
-    private void UsernameBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-
-    }
-}*/
 
 public partial class MainWindow : Window
 {
@@ -294,5 +42,240 @@ public partial class MainWindow : Window
 
         StatusTextBlock.Text =
             "Chức năng đăng ký sẽ được kết nối ở bước tiếp theo.";
+    }
+}*/
+
+
+using System;
+using System.IO;
+using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Windows;
+
+namespace Chat.Client.Wpf;
+
+public partial class MainWindow : Window
+{
+    private ChatConnection? _connection;
+    private bool _connectionTransferred;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    private async void LoginButton_Click(
+        object sender, RoutedEventArgs e)
+    {
+        string username = UsernameTextBox.Text.Trim();
+        string password = PasswordInput.Password;
+
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrEmpty(password))
+        {
+            ShowStatus("Vui lòng nhập tên tài khoản và mật khẩu.");
+            return;
+        }
+
+        SetBusy(true);
+
+        try
+        {
+            ChatConnection connection = await GetConnectionAsync();
+
+            AuthResponse result = await connection.LoginAsync(
+                username, password);
+
+            if (!result.Success)
+            {
+                ShowStatus($"Đăng nhập thất bại: {result.Message}");
+                return;
+            }
+
+            string authenticatedUsername = result.Username ?? username;
+
+            // Chuyển quyền sở hữu kết nối sang cửa sổ chat.
+            _connectionTransferred = true;
+            _connection = null;
+
+            var chatWindow = new ChatWindow(
+                connection, authenticatedUsername);
+
+            chatWindow.Closed += (_, _) => Close();
+
+            chatWindow.Show();
+            Hide();
+        }
+        catch (AuthenticationException)
+        {
+            ShowStatus(
+                "Không xác thực được chứng chỉ TLS của server. " +
+                "Hãy kiểm tra chứng chỉ và tên máy chủ.");
+        }
+        catch (TimeoutException)
+        {
+            ShowStatus("Server không phản hồi kịp thời.");
+        }
+        catch (OperationCanceledException)
+        {
+            ShowStatus("Kết nối đã bị hủy.");
+        }
+        catch (SocketException)
+        {
+            ShowStatus(
+                "Không kết nối được server. Hãy kiểm tra server và cổng 5000.");
+            await ResetConnectionAsync();
+        }
+        catch (IOException)
+        {
+            ShowStatus("Kết nối bị gián đoạn. Hãy thử lại.");
+            await ResetConnectionAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Có lỗi: {ex.Message}");
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private async void RegisterButton_Click(
+        object sender, RoutedEventArgs e)
+    {
+        string username = UsernameTextBox.Text.Trim();
+        string password = PasswordInput.Password;
+
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrEmpty(password))
+        {
+            ShowStatus("Nhập tên tài khoản và mật khẩu để đăng ký.");
+            return;
+        }
+
+        SetBusy(true);
+
+        try
+        {
+            ChatConnection connection = await GetConnectionAsync();
+
+            AuthResponse result = await connection.RegisterAsync(
+                username, password);
+
+            if (!result.Success)
+            {
+                ShowStatus($"Đăng ký thất bại: {result.Message}");
+                return;
+            }
+
+            ShowStatus(
+                "Đăng ký thành công! Đang đăng nhập...",
+                isError: false);
+
+            // Server cho phép đăng nhập tiếp trên cùng kết nối.
+            AuthResponse login = await connection.LoginAsync(
+                username, password);
+
+            if (!login.Success)
+            {
+                ShowStatus(
+                    $"Đăng ký thành công nhưng đăng nhập thất bại: {login.Message}");
+                return;
+            }
+
+            string authenticatedUsername = login.Username ?? username;
+
+            _connectionTransferred = true;
+            _connection = null;
+
+            var chatWindow = new ChatWindow(
+                connection, authenticatedUsername);
+
+            chatWindow.Closed += (_, _) => Close();
+
+            chatWindow.Show();
+            Hide();
+        }
+        catch (AuthenticationException)
+        {
+            ShowStatus("Không xác thực được chứng chỉ TLS của server.");
+        }
+        catch (TimeoutException)
+        {
+            ShowStatus("Server không phản hồi kịp thời.");
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Không thể đăng ký: {ex.Message}");
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private async Task<ChatConnection> GetConnectionAsync()
+    {
+        if (_connection is { IsConnected: true })
+            return _connection;
+
+        await ResetConnectionAsync();
+
+        var connection = new ChatConnection();
+
+        try
+        {
+            // Server đang chạy trên cùng máy.
+            // Nếu server ở máy khác, đổi thành hostname/IP phù hợp.
+            await connection.ConnectAsync("127.0.0.1", 5000);
+
+            _connection = connection;
+            return connection;
+        }
+        catch
+        {
+            await connection.DisposeAsync();
+            throw;
+        }
+    }
+
+    private async Task ResetConnectionAsync()
+    {
+        if (_connection is null)
+            return;
+
+        ChatConnection oldConnection = _connection;
+        _connection = null;
+
+        await oldConnection.DisposeAsync();
+    }
+
+    private void ShowStatus(string text, bool isError = true)
+    {
+        StatusTextBlock.Text = text;
+        StatusTextBlock.Foreground = isError
+            ? System.Windows.Media.Brushes.Firebrick
+            : System.Windows.Media.Brushes.ForestGreen;
+    }
+
+    private void SetBusy(bool busy)
+    {
+        LoginButton.IsEnabled = !busy;
+        RegisterButton.IsEnabled = !busy;
+        UsernameTextBox.IsEnabled = !busy;
+        PasswordInput.IsEnabled = !busy;
+
+        LoginButton.Content = busy
+            ? "Đang xử lý..."
+            : "Đăng nhập";
+    }
+
+    protected override async void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+
+        if (!_connectionTransferred)
+            await ResetConnectionAsync();
     }
 }
