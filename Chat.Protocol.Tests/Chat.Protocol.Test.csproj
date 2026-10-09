@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chat.Protocol\Chat.Protocol.csproj" />
-    <ProjectReference Include="..\Chat.Server\Chat.Server.csproj" />
   </ItemGroup>
 
 </Project>
