@@ -1,4 +1,5 @@
 .git
+certs/
 ## Build results / Output directories
 [Bb]in/
 [Oo]bj/
