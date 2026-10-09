@@ -1,0 +1,36 @@
+.git
+## Build results / Output directories
+[Bb]in/
+[Oo]bj/
+[L2]og/
+[L2]ogs/
+
+## Visual Studio cache & user settings
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userhost
+*.sln.docstates
+
+## Auto-generated code files (WPF / C#)
+*.g.cs
+*.g.i.cs
+*.baml
+
+## NuGet packages & cache
+*.nupkg
+*.snupkg
+**/packages/
+project.lock.json
+project.nuget.cache
+
+## OS generated files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Server", "Chat.Server\Chat.Server.csproj", "{B3142D29-C490-4E16-9CC6-BCF833EC2DD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Client", "Chat.Client\Chat.Client.csproj", "{E44195E3-F154-47FD-BD0D-CF4B1F1130B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Protocol", "Chat.Protocol\Chat.Protocol.csproj", "{B5B4C1E5-2187-4824-A454-BE22FC5A349D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Protocol.Test", "Chat.Protocol.Tests\Chat.Protocol.Test.csproj", "{81F02C2B-FCD2-423C-89BE-5A70C237497F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Client.Core", "Chat.Client.Core\Chat.Client.Core.csproj", "{9F7EDACC-FBDD-429F-807E-5B93935F7D58}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Client.Wpf", "Chat.Client.Wpf\Chat.Client.Wpf.csproj", "{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Server.Tests", "Chat.Server.Tests\Chat.Server.Tests.csproj", "{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3142D29-C490-4E16-9CC6-BCF833EC2DD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3142D29-C490-4E16-9CC6-BCF833EC2DD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3142D29-C490-4E16-9CC6-BCF833EC2DD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3142D29-C490-4E16-9CC6-BCF833EC2DD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E44195E3-F154-47FD-BD0D-CF4B1F1130B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E44195E3-F154-47FD-BD0D-CF4B1F1130B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E44195E3-F154-47FD-BD0D-CF4B1F1130B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E44195E3-F154-47FD-BD0D-CF4B1F1130B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5B4C1E5-2187-4824-A454-BE22FC5A349D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5B4C1E5-2187-4824-A454-BE22FC5A349D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5B4C1E5-2187-4824-A454-BE22FC5A349D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5B4C1E5-2187-4824-A454-BE22FC5A349D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81F02C2B-FCD2-423C-89BE-5A70C237497F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81F02C2B-FCD2-423C-89BE-5A70C237497F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81F02C2B-FCD2-423C-89BE-5A70C237497F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81F02C2B-FCD2-423C-89BE-5A70C237497F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F7EDACC-FBDD-429F-807E-5B93935F7D58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F7EDACC-FBDD-429F-807E-5B93935F7D58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F7EDACC-FBDD-429F-807E-5B93935F7D58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F7EDACC-FBDD-429F-807E-5B93935F7D58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2BA04E1A-1DC3-43D6-B49F-DC824A8D839F}
+	EndGlobalSection
+EndGlobal
