@@ -1,5 +1,8 @@
 ﻿
+using System.IO;
 using System.Net.Sockets;
+using System.Net.Security;
+using System.Threading;
 using System.Threading.Channels;
 using Chat.Protocol;
 
@@ -16,28 +19,43 @@ public sealed class ClientSession : IDisposable
                 FullMode = BoundedChannelFullMode.Wait
             });
 
+    private string? _authenticatedUsername;
+
     public string Id { get; } = Guid.NewGuid().ToString("N");
 
-    public string Username { get; set; } = "";
+    // Danh tính chỉ được đặt từ kết quả xác thực phía server.
+    public string Username { get; internal set; } = "";
 
     public TcpClient Client { get; }
 
-    public NetworkStream Stream { get; }
+    public Stream Stream { get; }
 
-    public ClientSession(TcpClient client)
+    public bool IsSecureTransport { get; }
+
+    public string? AuthenticatedUsername =>
+        Volatile.Read(ref _authenticatedUsername);
+
+    public bool IsAuthenticated =>
+        AuthenticatedUsername is not null;
+
+    public ClientSession(TcpClient client, SslStream secureStream)
     {
+        if (!secureStream.IsAuthenticated || !secureStream.IsEncrypted)
+        {
+            throw new InvalidOperationException(
+                "ClientSession requires an authenticated TLS stream.");
+        }
+
         Client = client;
-        Stream = client.GetStream();
+        Stream = secureStream;
+        IsSecureTransport = true;
     }
 
-    public bool TrySend(ChatMessage message)
-    {
-        // Không chờ nếu hàng đợi đã đầy.
-        // Server sẽ ngắt client chậm ở tầng quản lý kết nối.
-        return _outgoing.Writer.TryWrite(message);
-    }
+    public bool TrySend(ChatMessage message) =>
+        _outgoing.Writer.TryWrite(message);
 
-    public async Task SendLoopAsync(CancellationToken cancellationToken)
+    public async Task SendLoopAsync(
+        CancellationToken cancellationToken)
     {
         await foreach (ChatMessage message in
             _outgoing.Reader.ReadAllAsync(cancellationToken))
@@ -47,36 +65,20 @@ public sealed class ClientSession : IDisposable
         }
     }
 
-    public void CompleteSending()
-    {
+    public bool TrySetAuthenticated(string username) =>
+        Interlocked.CompareExchange(
+            ref _authenticatedUsername, username, null) is null;
+
+    public void ClearAuthenticated() =>
+        Interlocked.Exchange(ref _authenticatedUsername, null);
+
+    public void CompleteSending() =>
         _outgoing.Writer.TryComplete();
-    }
 
     public void Dispose()
     {
         _outgoing.Writer.TryComplete();
         Stream.Dispose();
         Client.Dispose();
-    }
-
-    private string? _authenticatedUsername;
-
-    public string? AuthenticatedUsername =>
-        Volatile.Read(ref _authenticatedUsername);
-
-    public bool IsAuthenticated =>
-        AuthenticatedUsername is not null;
-
-    public bool TrySetAuthenticated(string username)
-    {
-        return Interlocked.CompareExchange(
-            ref _authenticatedUsername,
-            username,
-            null) is null;
-    }
-
-    public void ClearAuthenticated()
-    {
-        Interlocked.Exchange(ref _authenticatedUsername, null);
     }
 }
