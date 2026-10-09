@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using Chat.Protocol;
 
 string host = args.Length > 0 ? args[0] : "127.0.0.1";
@@ -136,6 +137,24 @@ try
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
+            if (line.Equals("/history", StringComparison.OrdinalIgnoreCase))
+            {
+                var historyRequest = new ChatMessage
+                {
+                    Type = "history.get",
+                    RequestId = Guid.NewGuid().ToString("N"),
+                    Payload = JsonSerializer.SerializeToElement(new
+                    {
+                        limit = 50
+                    })
+                };
+
+                await MessageFraming.WriteAsync(
+                    tlsStream,
+                historyRequest);
+
+                continue;
+            }
             if (line.Length > 4000)
             {
                 Console.WriteLine(
