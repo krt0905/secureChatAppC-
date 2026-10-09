@@ -18,9 +18,8 @@ public sealed class ClientSession : IDisposable
                 SingleWriter = false,
                 FullMode = BoundedChannelFullMode.Wait
             });
-
+    private int _disposed;
     private string? _authenticatedUsername;
-
     public string Id { get; } = Guid.NewGuid().ToString("N");
 
     // Danh tính chỉ được đặt từ kết quả xác thực phía server.
@@ -77,6 +76,9 @@ public sealed class ClientSession : IDisposable
 
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
+
         _outgoing.Writer.TryComplete();
         Stream.Dispose();
         Client.Dispose();
