@@ -70,10 +70,11 @@ try
             string,
             TaskCompletionSource<AuthResponse>>();
 
-    // Chỉ ReceiveLoopAsync được phép đọc từ stream.
-    Task receiveTask = ReceiveLoopAsync(
-        stream, pendingAuth, cts.Token);
 
+    // Chỉ ReceiveLoopAsync được phép đọc từ stream.
+    var history = new HistoryState();
+    Task receiveTask = ReceiveLoopAsync(
+        stream, pendingAuth, history,cts.Token);
     try
     {
         // 5. Đăng ký nếu người dùng chọn Register.
@@ -136,22 +137,34 @@ try
 
             if (string.IsNullOrWhiteSpace(line))
                 continue;
-
-            if (line.Equals("/history", StringComparison.OrdinalIgnoreCase))
+            if (line.Equals("/history", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("/history more", StringComparison.OrdinalIgnoreCase))
             {
+                bool loadOlder = line.Equals(
+                    "/history more",
+                    StringComparison.OrdinalIgnoreCase);
+
+                if (loadOlder && !history.hasMoreHistory)
+                {
+                    Console.WriteLine("[HISTORY] No older messages available.");
+                    continue;
+                }
+
                 var historyRequest = new ChatMessage
                 {
                     Type = "history.get",
                     RequestId = Guid.NewGuid().ToString("N"),
                     Payload = JsonSerializer.SerializeToElement(new
                     {
-                        limit = 50
+                        limit = 50,
+                        beforeId = loadOlder ? history.oldestHistoryId : null
                     })
                 };
 
+                // Dùng cách gửi message hiện tại của client tại đây.
                 await MessageFraming.WriteAsync(
                     tlsStream,
-                historyRequest);
+                    historyRequest);
 
                 continue;
             }
@@ -265,6 +278,7 @@ static async Task ReceiveLoopAsync(
     ConcurrentDictionary<
         string,
         TaskCompletionSource<AuthResponse>> pendingAuth,
+      HistoryState history,
     CancellationToken cancellationToken)
 {
     try
@@ -374,6 +388,57 @@ static async Task ReceiveLoopAsync(
                         break;
                     }
 
+                case"history.result":
+                    {
+                        if (!message.Payload.TryGetProperty(
+                                "messages", out JsonElement messagesElement) ||
+                            messagesElement.ValueKind != JsonValueKind.Array)
+                        {
+                            Console.WriteLine("[HISTORY] Invalid response.");
+                            continue;
+                        }
+
+                        var items = messagesElement.EnumerateArray().ToList();
+
+                        Console.WriteLine("----- CHAT HISTORY -----");
+
+                        foreach (JsonElement item in items)
+                        {
+                            long id = item.GetProperty("messageId").GetInt64();
+                            string sender = item.GetProperty("sender").GetString() ?? "?";
+                            string text = item.GetProperty("text").GetString() ?? "";
+                            string sentAt = item.GetProperty("sentAtUtc").ToString();
+
+                            Console.WriteLine($"[{sentAt}] {sender}: {text}");
+                        }
+
+                        if (items.Count > 0)
+                        {
+                            long pageOldestId = items
+                                .Min(item => item.GetProperty("messageId").GetInt64());
+
+                            // Trang tải cũ hơn phải cập nhật con trỏ,
+                            // nhưng không được làm mất con trỏ của trang mới hơn.
+                            if (!history.oldestHistoryId.HasValue ||
+                                pageOldestId < history.oldestHistoryId.Value)
+                            {
+                                history.oldestHistoryId = pageOldestId;
+                            }
+                        }
+
+                        history.hasMoreHistory =
+                            message.Payload.TryGetProperty("hasMore", out var moreElement) &&
+                            moreElement.ValueKind == JsonValueKind.True;
+
+                        Console.WriteLine("------------------------");
+
+                        Console.WriteLine(
+                          history.hasMoreHistory
+                                ? "Type /history more to load older messages."
+                                : "No older messages available.");
+                        break;
+                    }
+
                 default:
                     Console.WriteLine($"[UNKNOWN] {message.Type}");
                     break;
@@ -471,3 +536,9 @@ sealed record AuthResponse(
     string Code,
     string Message,
     string? Username);
+
+sealed class HistoryState
+{
+    public long? oldestHistoryId;
+    public bool hasMoreHistory;
+}

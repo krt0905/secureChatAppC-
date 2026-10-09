@@ -260,6 +260,7 @@ static async Task HandleClientAsync(
 
                 int limit = 50;
 
+
                 if (message.Payload.TryGetProperty(
                         "limit", out JsonElement limitElement))
                 {
@@ -281,7 +282,8 @@ static async Task HandleClientAsync(
                 long? beforeId = null;
 
                 if (message.Payload.TryGetProperty(
-                        "beforeId", out JsonElement beforeElement))
+                        "beforeId", out JsonElement beforeElement) &&
+                    beforeElement.ValueKind != JsonValueKind.Null)
                 {
                     if (beforeElement.ValueKind != JsonValueKind.Number ||
                         !beforeElement.TryGetInt64(out long parsedBeforeId) ||

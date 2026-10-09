@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chat.Client.Core\Chat.Client.Core.csproj" />
+    <ProjectReference Include="..\Chat.Protocol\Chat.Protocol.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
