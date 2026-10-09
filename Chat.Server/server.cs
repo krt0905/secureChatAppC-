@@ -8,6 +8,7 @@ using System.Text.Json;
 using Chat.Protocol;
 using Chat.Server;
 using Chat.Server.Auth;
+using Npgsql;
 
 const int port = 5000;
 
@@ -71,7 +72,7 @@ try
         }
 
         _ = HandleClientAsync(
-            client, certificate, auth, hub, shutdown.Token);
+            client, certificate, auth, hub, messageRepository, shutdown.Token);
     }
 }
 catch (ObjectDisposedException) when (shutdown.IsCancellationRequested)
@@ -90,6 +91,7 @@ static async Task HandleClientAsync(
     X509Certificate2 certificate,
     AuthenticationService auth,
     ChatHub hub,
+    MessageRepository messageRepository,
     CancellationToken serverToken)
 {
     string endpoint =
@@ -273,27 +275,55 @@ static async Task HandleClientAsync(
                     continue;
                 }
 
-                // Danh tính lấy từ session, không từ payload client.
                 string sender = session.AuthenticatedUsername!;
 
+                SavedMessage? savedMessage;
+
+                try
+                {
+                    savedMessage = await messageRepository.SaveAsync(
+                        sender,
+                        text,
+                        connectionCts.Token);
+                }
+                catch (NpgsqlException ex)
+                {
+                    // Không ghi nội dung tin nhắn hoặc thông tin bí mật vào log.
+                    Console.WriteLine(
+                        $"[DB ERROR] Saving chat message failed: {ex.GetType().Name}");
+
+                    SendError(
+                        session,
+                        message.RequestId,
+                        "Could not save message. Please try again.");
+
+                    continue;
+                }
+
+                if (savedMessage is null)
+                {
+                    SendError(
+                        session,
+                        message.RequestId,
+                        "Could not find the sender account.");
+
+                    continue;
+                }
+
+                // Chỉ broadcast sau khi PostgreSQL đã lưu thành công.
                 hub.Broadcast(CreateMessage(
                     "chat.receive",
                     message.RequestId,
                     new
                     {
-                        sender,
-                        text,
-                        sentAtUtc = DateTimeOffset.UtcNow
+                        messageId = savedMessage.Id,
+                        sender = savedMessage.Sender,
+                        text = savedMessage.Text,
+                        sentAtUtc = savedMessage.CreatedAt
                     }));
 
-                // Tránh ghi nội dung chat nhạy cảm vào log.
-                Console.WriteLine($"[CHAT] Message from {sender}");
-            }
-            else
-            {
-                SendError(
-                    session, message.RequestId,
-                    "Unsupported message type.");
+                Console.WriteLine(
+                    $"[CHAT] Saved message {savedMessage.Id} from {sender}");
             }
         }
     }
