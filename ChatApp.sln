@@ -15,9 +15,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Client.Core", "Chat.Cl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Client.Wpf", "Chat.Client.Wpf\Chat.Client.Wpf.csproj", "{59FDF8F6-31CD-4BCD-8232-8AB87AAF4E2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Server.Tests", "Chat.Server.Tests\Chat.Server.Tests.csproj", "{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Server.Tests", "Chat.Server.Tests\Chat.Server.Tests.csproj", "{A7EDDDA5-BD85-4EBF-B9A9-256C1BB35E63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PfxDiagnostic", "PfxDiagnostic\PfxDiagnostic.csproj", "{AA3F3042-D3CA-450A-A3F8-DC2CB25D1C18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PfxDiagnostic", "PfxDiagnostic\PfxDiagnostic.csproj", "{AA3F3042-D3CA-450A-A3F8-DC2CB25D1C18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{068242C0-F55B-4D65-BA1B-2A547664A1DA}"
+	ProjectSection(SolutionItems) = preProject
+		PROJECT_STATE.md = PROJECT_STATE.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
