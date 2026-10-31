@@ -1,5 +1,7 @@
 .git
 certs/
+temp.txt
+
 ## Build results / Output directories
 [Bb]in/
 [Oo]bj/
